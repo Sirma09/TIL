@@ -1,3 +1,7 @@
 gitの復習
 git add 
 git commit
+git status
+git log (--oneline, -p "filename", -n 3)
+git diff (ステージとの差分）
+git diff HEAD（ステージとローカルリポジトリの差分）
