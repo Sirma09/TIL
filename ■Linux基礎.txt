@@ -63,12 +63,21 @@
 ・mvコマンド
 -i:cpと同じ
 -f(--force)：強制的に処理を実行
-※mvコマンドは第2引数が存在するdirなら移動、存在しないfile/dirなら名前の変更を行う
+※mvコマンドは第2引数が存在するdirなら移動、存在しないfile/dirならリネームを行う
+
+★mvした後にcd !$とするとファイルの移動先へスムーズに移動できる
+→bashでは!$を使うと、直前に実行したコマンドの末尾の引数に展開される。
+→2個前の引数なら!-2$
+
 
 ・touchコマンド
 ①空ファイル作成
-②-t:タイムスタンプ変更
+②-t(--date):タイムスタンプ変更
+※ブレース展開と組み合わせて作業効率UP
+例）touch file{1..3}.txt　→　file1.txt file2.txt file3.txt
 
+・ブレース展開の注意点
+→スペースを入れない
 
 
 ◉ファイルの内容表示
@@ -95,11 +104,27 @@ G/g：ファイル最終行/先頭へジャンプ
 
 
 ・head/tail
-デフォルトで先頭/末尾10行を表示
+先頭/末尾からn行を表示（デフォルトは10行）
 -n 数字：指定した行を表示
 
+★tail -f：ログ監視（Ctrl+Cでストップするまで更新を待機）
+例）tail -f error.log | grep 500  #500を含むログだけ監視（500を含むログが出力されたら脱出）
 
 
+・sort/uniq
+例）cat file1 | sort | uniq　#file1を行単位でソートして、重複行を排除
+
+
+・grep
+-e(et)：andのこと
+-v：文字列含む行を削除
+ cat error.log | grep ERROR: error.logからERRORを含む行だけ抽出
+ cat file1.txt | grep -2 -e CCC -e JJJ | grep -v -e AAA -e BBB -e KKK -e LLL
+　→file1.txtからCCCまたはJJJを含む行を前後2行含めて表示、その中からAAA BBB KKK LLLを含む行を削除
+
+
+・sed
+sed 's/ /\n/g': スペースを改行に置換
 
 
 ◉aliasの設定・確認・削除
