@@ -61,25 +61,10 @@ sudo firewall-cmd --add-service=http --zone=public --permanent
 sudo firewall-cmd --reload
 （必ず--permanentで恒久化した後はリロード！）
 
-設定後、rebootで再起動し各確認コマンドでActiveになっていることを確認
+
+
+⑧
 
 
 
-⑧ログの確認
-sudo ls /var/log/httpd
-sudo less /var/log/httpd/access_log　
-※テキストではcatだが、lessの方がページャ検索機能使えるし便利だった
-※エラー番号：「200」:成功、「404」：Not Found
-（その他、304や403が記録されることも）
 
-
-⑨index.htmlを/var/www/htmlに配置
-sudo less /var/log/httpd/error_log 内でindex.htmlがないというエラーを確認。
-→Webブラウザがファイル名を指定しなかった場合にデフォルトで参照されるHTMLファイル（index.html)を配置する。
-
-sudo sh -c "echo 'Hello,World' > /var/www/html/index.html"
-→管理者権限必要なdirにリダイレクトでファイルを作成する場合、sudoにsh -cコマンドを付加する
-→コマンド全体は”、書き込む文字列は’で囲む
-
-
-テストページを更新し、Hello,Worldの文字列を確認！GJ！
