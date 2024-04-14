@@ -1,0 +1,104 @@
+■Linux DNSサーバ構築
+
+
+◉環境
+VMware Workstation 17
+CentOS7
+172.20.10.7
+
+
+
+
+◉ゾーンの設定
+
+
+①BINDのインストール　
+sudo yum install bind bind-chroot
+
+
+②/etc/named.conf（BIND基本ファイル）の設定
+→BINDをDNSコンテンツサーバとして設定する。
+sudo vi /etc/named.conf
+
+テキストの通りに/etc/named.confファイルを書き換える。
+・外部IPの追加（lo ; 自分のip)
+・問い合わせを許可するアドレスの設定（localhost→any)
+・今回設定するのはコンテンツサーバなので、recursion(再帰問い合わせ）をnoに変更
+・正引きゾーンの追加（zone定義）
+
+
+③ゾーンファイルの準備
+ sudo cp -p /var/named/named.empty /var/named/(zone定義で指定したファイル名).zone
+ sudo ls -l /var/named/(zone定義で指定したファイル名).zone
+→ゾーンファイルのテンプレであるnamed.emptyを権限ごとコピー
+
+・$ORIGIN
+→ゾーン定義が対象としているゾーン名補完機能。
+例えば、$ORIGIN example.jpの定義で、wwwと入力すればwww.example.jpと自動で補完してくれる
+
+・SOAレコード
+→ゾーン内の管理ポリシー。serial(シリアルナンバー）はゾーン定義を変更する際に毎回変える必要がある
+
+・NS＋MXレコードの定義
+→末尾の「.」を忘れない！（右側にFQDNを入れるので）
+
+
+
+④BIND設定ファイルとゾーンファイルの書式確認
+sudo named-checkconf
+sudo named-checkzone example1.jp. /var/named/example1.jp.zone
+($ORIGINに指定したゾーン名) (確認を行うゾーンファイル名）
+
+【エラー発生】
+・MXをMX 10に変更→解決
+・IN SOAの後に余計な@→解決
+
+
+⑤BINDの起動と自動起動設定
+sudo systemctl start named-chroot (statusで確認）
+sudo systemctl enable named-chroot（is-enabledで確認）
+
+
+⑥DNSコンテンツサーバへの穴あけ
+sudo firewall-cmd --add-service=dns --zone=public --permanent
+sudo firewall-cmd --reload
+sudo firewall-cmd --list-services（確認）
+
+
+⑦/etc/resolv.confによる参照DNSサーバー設定
+【エラー発生！】
+テキストのようにexample1.jpの情報が追加されていない
+
+・考えられる原因
+不明。恐らく研修で使用したDNSサーバー設定がNetWorkManagerに影響を与えているんだと思うが・・・
+
+・解決
+/etc/resolv.conf や /etc/sysconfig/network-scripts/ifcfg-XXXX を直接編集せず, nmcliコマンドで変更することが推奨されている.
+とのことで、nmcliコマンドを用いて設定してみる。
+ # nmcli d (インターフェースの現状を表示）
+ # nmcli c m ens33 ipv4.dns 172.20.10.7 ipv4.dns-search example1.jp（DNSの追加とsearchの変更)
+ # nmcli c m ens33 ipv4.ignore-auto-dns yes（DHCPからDNSの自動取得を無効にする）
+ # sudo systemctl restart NetworkManager（変更の反映）
+ # cat /etc/resolv.conf（変更の確認）
+
+
+
+⑧NATネットワークの停止
+sudo nmcli connection down ens33
+
+【エラー発生！】
+あらかじめ仮想マシン設定をブリッジ接続にしていたからか、「アクティブな接続ではない」との表示
+cat /etc/resolv.confを入力しても設定したDNSサーバ情報が表示されない
+また、vmwareを改めて付け直したところイーサネット(ens33）に接続できないとの表示
+
+・考えられる原因
+NetworkManager関連
+→nmcli d で接続デバイスを確認したところens33が切断済みになっていた
+→nmcli c u (connection up)してみる
+→アクティベーションに失敗
+★一度マシン自体をパワーオフしてNAT接続に切り替えたら接続成功！
+（なぜ？）
+
+
+
+
