@@ -1,0 +1,19 @@
+■HTML/CSS
+
+・HTMLで画像の大きさを制御できる
+例）<img src="" width="160" height="160">
+
+・リスト表現タグ
+箇条書きリスト（ul、li） [U]nordered、[i]tem
+順序付きリスト（ol、li） [O]rdered
+説明付きリスト（dl、dt、dd）[D]escription、[t]erm、[d]etails
+
+
+・表のマークアップ
+①全体(table)
+②見出し/本体(thead/tbody)
+③行(tr) ※row
+④セル(th,td) ※header、data cell
+
+
+
